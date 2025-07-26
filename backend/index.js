@@ -474,6 +474,7 @@ app.use('/api/hearts', require('./routes/hearts'));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/payment', require('./routes/payment'));
 app.use('/api/deploy', require('./routes/deployment'));
+app.use('/api/messages', require('./routes/messages'));
 // 🔧 Payment 경로 우회 - Cloudflare 차단 대응
 app.use('/api/purchase', require('./routes/payment')); // 대안 경로
 app.use('/api/transaction', require('./routes/payment')); // 대안 경로 2

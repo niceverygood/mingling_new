@@ -231,7 +231,7 @@ const apiCall = async (method, url, data = null, options = {}) => {
         ...options
       };
       
-      if (data && ['post', 'put', 'patch'].includes(method.toLowerCase())) {
+      if (data && ['post', 'put', 'patch', 'delete'].includes(method.toLowerCase())) {
         config.data = data;
       }
       
@@ -524,7 +524,12 @@ export const chatsAPI = {
   delete: (id) => apiCall('delete', API_ENDPOINTS.CHATS.BY_ID(id)),
   getMessages: (chatId) => apiCall('get', API_ENDPOINTS.CHATS.MESSAGES(chatId)),
   sendMessage: (chatId, messageData) => apiCall('post', API_ENDPOINTS.CHATS.MESSAGES(chatId), messageData),
-  getRecommendations: (chatId) => apiCall('get', `${API_ENDPOINTS.CHATS.BY_ID(chatId)}/recommendations`)
+  getRecommendations: (chatId) => apiCall('get', `${API_ENDPOINTS.CHATS.BY_ID(chatId)}/recommendations`),
+  addReaction: (messageId, emoji) => apiCall('post', `/messages/${messageId}/reactions`, { emoji }),
+  removeReaction: (messageId, emoji) => {
+    const encodedEmoji = encodeURIComponent(emoji);
+    return apiCall('delete', `/messages/${messageId}/reactions/${encodedEmoji}`);
+  },
 };
 
 // Conversations API

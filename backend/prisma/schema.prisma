@@ -22,6 +22,7 @@ model User {
   personas    Persona[]   // 사용자가 만든 페르소나들
   chats       Chat[]
   messages    Message[]
+  reactions   Reaction[]
   heartTransactions HeartTransaction[]
   relations   Relation[]  // 호감도 관계
 
@@ -102,8 +103,24 @@ model Message {
   chat        Chat     @relation(fields: [chatId], references: [id])
   userId      String
   user        User     @relation(fields: [userId], references: [id])
+  reactions   Reaction[]
 
   @@map("messages")
+}
+
+model Reaction {
+  id          String   @id @default(cuid())
+  emoji       String
+  createdAt   DateTime @default(now())
+
+  // Relations
+  messageId   String
+  message     Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId, emoji])
+  @@map("reactions")
 }
 
 model Persona {

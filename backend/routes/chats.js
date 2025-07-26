@@ -98,7 +98,13 @@ router.get('/:chatId/messages', async (req, res) => {
         id: true,
         content: true,
         isFromUser: true,
-        createdAt: true
+        createdAt: true,
+        reactions: {
+          select: {
+            emoji: true,
+            userId: true,
+          }
+        }
       }
     });
 
