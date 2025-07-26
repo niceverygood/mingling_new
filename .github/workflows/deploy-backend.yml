@@ -2,63 +2,64 @@ name: Deploy Backend to EC2
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'backend/**'
-      - '.github/workflows/deploy-backend.yml'
+      - "backend/**"
+      - ".github/workflows/deploy-backend.yml"
   workflow_dispatch:
 
 jobs:
   deploy:
     name: Deploy to EC2
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Deploy to EC2
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USER }}
-        key: ${{ secrets.EC2_PRIVATE_KEY }}
-        script: |
-          echo "🔄 Starting backend deployment..."
-          
-          # Navigate to project directory
-          cd /home/ec2-user/mingling_new || {
-            echo "❌ Project directory not found!"
-            exit 1
-          }
-          
-          # Pull latest code
-          echo "📥 Pulling latest code..."
-          git pull origin main
-          
-          # Navigate to backend
-          cd backend
-          
-          # Install dependencies
-          echo "📦 Installing dependencies..."
-          npm install --production
-          
-          # Stop existing server
-          echo "🛑 Stopping existing server..."
-          pkill -f 'node.*index.js' || echo "No existing server to stop"
-          sleep 3
-          
-          # Start new server
-          echo "🚀 Starting new server..."
-          nohup node index.js > /home/ec2-user/backend.log 2>&1 &
-          sleep 5
-          
-          # Check server status
-          echo "📊 Checking server status..."
-          ps aux | grep node | grep -v grep || echo "No node processes found"
-          
-          # Health check
-          echo "🔍 Running health check..."
-          curl -s http://localhost:8001/api/health || echo "Health check failed"
-          
-          echo "✅ Backend deployment completed!" 
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          script: |
+            echo "🔄 Starting backend deployment..."
+
+            # Navigate to project directory
+            cd /home/ec2-user/mingling_new || {
+              echo "❌ Project directory not found!"
+              exit 1
+            }
+
+            # Pull latest code
+            echo "📥 Pulling latest code..."
+            git pull origin main
+
+            # Navigate to backend
+            cd backend
+
+            # Install dependencies
+            echo "📦 Installing dependencies..."
+            npm install --production
+            npx prisma db push
+
+            # Stop existing server
+            echo "🛑 Stopping existing server..."
+            pkill -f 'node.*index.js' || echo "No existing server to stop"
+            sleep 3
+
+            # Start new server
+            echo "🚀 Starting new server..."
+            nohup node index.js > /home/ec2-user/backend.log 2>&1 &
+            sleep 5
+
+            # Check server status
+            echo "📊 Checking server status..."
+            ps aux | grep node | grep -v grep || echo "No node processes found"
+
+            # Health check
+            echo "🔍 Running health check..."
+            curl -s http://localhost:8001/api/health || echo "Health check failed"
+
+            echo "✅ Backend deployment completed!"
